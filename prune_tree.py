@@ -1,10 +1,3 @@
-"""
-Homework 4: The Pruning Gardener -- starter.
-
-Complete delete, count_nodes, and kth_smallest below. TreeNode and
-insert are already provided -- do not modify them. See
-HW4_The_Pruning_Gardener.md, Part B, for the full requirements.
-"""
 
 from typing import Optional
 
@@ -31,27 +24,86 @@ def insert(root: Optional[TreeNode], key: int) -> TreeNode:
 
 def delete(root: Optional[TreeNode], key: int) -> Optional[TreeNode]:
     """
-    Recursively delete `key` from the subtree rooted at `root`.
-    Return the new subtree root. Handle all three cases from Part A,
-    Question 1 (leaf, one child, two children -- via inorder
-    successor). Deleting a key not present should leave the tree
-    unchanged.
+    Recursively delete key from the BST.
+    Return the new subtree root.
     """
-    # TODO
-    raise NotImplementedError
+
+    # Base case: empty subtree
+    if root is None:
+        return None
+
+    # Search left subtree
+    if key < root.key:
+        root.left = delete(root.left, key)
+
+    # Search right subtree
+    elif key > root.key:
+        root.right = delete(root.right, key)
+
+    # Found the node to delete
+    else:
+
+        # Case 1: Leaf node
+        if root.left is None and root.right is None:
+            return None
+
+        # Case 2: Only right child
+        elif root.left is None:
+            return root.right
+
+        # Case 2: Only left child
+        elif root.right is None:
+            return root.left
+
+        # Case 3: Two children
+        else:
+            # Find inorder successor
+            successor = root.right
+
+            while successor.left is not None:
+                successor = successor.left
+
+            # Replace current key with successor key
+            root.key = successor.key
+
+            # Delete original successor
+            root.right = delete(root.right, successor.key)
+
+    return root
 
 
 def count_nodes(root: Optional[TreeNode]) -> int:
-    """Recursively return the number of nodes in the subtree rooted at `root`."""
-    # TODO
-    raise NotImplementedError
+    """Recursively count the nodes in a BST."""
+
+    # Base case: empty subtree
+    if root is None:
+        return 0
+
+    # Count current node and both subtrees
+    return 1 + count_nodes(root.left) + count_nodes(root.right)
 
 
 def kth_smallest(root: Optional[TreeNode], k: int) -> Optional[int]:
     """
-    Return the k-th smallest key (1-indexed) in the subtree rooted at
-    `root`, using count_nodes on subtrees to navigate directly instead
-    of a full inorder traversal. Return None if k is out of range.
+    Return the k-th smallest key (1-indexed).
+    Return None if k is out of range.
     """
-    # TODO
-    raise NotImplementedError
+
+    # Base cases: empty tree or invalid k
+    if root is None or k < 1:
+        return None
+
+    # Count nodes in left subtree
+    left_count = count_nodes(root.left)
+
+    # Current node is the k-th smallest
+    if k == left_count + 1:
+        return root.key
+
+    # Search left subtree
+    elif k <= left_count:
+        return kth_smallest(root.left, k)
+
+    # Search right subtree with adjusted k
+    else:
+        return kth_smallest(root.right, k - left_count - 1)
